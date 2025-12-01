@@ -1,9 +1,8 @@
 
-import { GoogleGenAI } from '@google/genai';
 import { models, ModelProvider } from '../constants';
 import { products } from './productData';
 
-// 图片转 Base64 (保持不变)
+// 图片转 Base64
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -23,11 +22,22 @@ export interface ChatMessage {
 }
 
 // ============================================================================
-// API CONFIGURATION
-// 
-// The API key is securely retrieved from environment variables.
-// Priority: process.env.API_KEY for Google GenAI
+// CONFIGURATION HELPER
 // ============================================================================
+
+const getGeminiConfig = () => {
+    const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY || process.env.API_KEY;
+    if (!apiKey) throw new Error("未配置 API Key (请在环境变量中设置 VITE_GEMINI_API_KEY)");
+    
+    // 默认使用官方地址，如果配置了代理则使用代理
+    // 注意：代理地址通常是 https://api.openai-proxy.org/google
+    let baseUrl = (import.meta as any).env.VITE_GEMINI_BASE_URL || "https://generativelanguage.googleapis.com";
+    
+    // 移除末尾斜杠以防双重斜杠
+    baseUrl = baseUrl.replace(/\/$/, "");
+    
+    return { apiKey, baseUrl };
+};
 
 const getProductContext = () => {
     return `你是一个全能的 AI 智能助手。
@@ -46,104 +56,98 @@ const getProductContext = () => {
     `;
 };
 
-// Helper: 获取 Google GenAI 实例，支持自定义 BaseURL (中转/代理)
-const getGoogleAI = () => {
-    // 优先使用 VITE_GEMINI_API_KEY，如果没有则尝试使用 process.env.API_KEY
-    // Vercel 环境变量通常在 import.meta.env 中可用
-    const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY || process.env.API_KEY;
+// ============================================================================
+// GEMINI FETCH IMPLEMENTATION (Native Fetch to support Proxies)
+// ============================================================================
 
-    if (!apiKey) throw new Error("未配置 API Key (请在环境变量中设置 VITE_GEMINI_API_KEY 或 API_KEY)");
+const callGeminiFetch = async (
+    modelId: string, 
+    contents: any[], 
+    systemInstruction?: string
+): Promise<string> => {
+    const { apiKey, baseUrl } = getGeminiConfig();
     
-    // 注意: @google/genai SDK 目前在构造函数中不支持直接传递 baseUrl。
-    // 如果需要使用代理，可能需要自定义 fetch 或等待 SDK 更新。
-    // 为了修复类型错误，此处移除了 baseUrl 配置。
-    // const baseUrl = (import.meta as any).env.VITE_GEMINI_BASE_URL;
+    // 构建 API URL
+    // Gemini API 路径: /v1beta/models/{model}:generateContent
+    const url = `${baseUrl}/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
 
-    return new GoogleGenAI({ 
-        apiKey: apiKey,
-    });
+    const body: any = {
+        contents: contents,
+        generationConfig: {
+            temperature: 0.7,
+        }
+    };
+
+    if (systemInstruction) {
+        body.systemInstruction = {
+            parts: [{ text: systemInstruction }]
+        };
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            console.error("Gemini API Error:", errData);
+            throw new Error(`API 请求失败: ${response.status} ${response.statusText} - ${errData.error?.message || '未知错误'}`);
+        }
+
+        const data = await response.json();
+        
+        // 解析响应
+        if (data.candidates && data.candidates.length > 0) {
+            const parts = data.candidates[0].content?.parts;
+            if (parts && parts.length > 0) {
+                return parts[0].text || "无文本回复";
+            }
+        }
+        
+        return "未能生成有效回复";
+
+    } catch (error) {
+        console.error("Fetch error:", error);
+        throw error;
+    }
 };
 
-// 确保此函数被导出 (Exported)
+// ============================================================================
+// EXPORTED FUNCTIONS
+// ============================================================================
+
 export const sendChatMessage = async (history: ChatMessage[], modelId: string): Promise<string> => {
     const selectedModel = models.find(m => m.id === modelId);
     if (!selectedModel) throw new Error("未找到模型配置");
 
     const systemInstruction = getProductContext();
 
-    // 关键修复：过滤掉开头的 model 消息 (例如欢迎语)
-    // 大多数 LLM API (包括 Gemini) 要求对话历史必须以 User 开始，或者 User/Model 交替。
-    // 如果第一条是 Model 的欢迎语，会导致 API 报错 (400 Invalid Argument)。
+    // 过滤掉开头的 model 消息，确保以 user 开头
     let apiHistory = [...history];
     while (apiHistory.length > 0 && apiHistory[0].role === 'model') {
         apiHistory.shift();
     }
-
-    // 如果没有用户消息（例如用户还没发），直接返回
     if (apiHistory.length === 0) return "请先输入问题。";
 
-    const newMessage = apiHistory[apiHistory.length - 1];
-    const pastHistory = apiHistory.slice(0, apiHistory.length - 1);
-
-    // 🔴 1. Google Gemini
+    // 🔴 1. Google Gemini (Native Fetch)
     if (selectedModel.provider === ModelProvider.GOOGLE) {
-        const ai = getGoogleAI();
-        
-        // 转换历史记录格式
-        const googleHistory = pastHistory.map(msg => ({
+        // 转换历史记录格式为 Gemini API 格式
+        const contents = apiHistory.map(msg => ({
             role: msg.role,
             parts: [{ text: msg.content }]
         }));
 
-        // 使用 chats.create 建立会话
-        const chat = ai.chats.create({
-            model: modelId,
-            config: { systemInstruction },
-            history: googleHistory
-        });
-
-        const response = await chat.sendMessage({
-            message: newMessage.content
-        });
-
-        return response.text || "无回复";
+        return await callGeminiFetch(modelId, contents, systemInstruction);
     }
 
     // 🔵 2. OpenAI 兼容厂商
     else if (selectedModel.provider === ModelProvider.OPENAI) {
-        const envPrefix = selectedModel.envKey || 'LLM'; 
-        const apiKey = (import.meta as any).env[`VITE_${envPrefix}_API_KEY`];
-        const baseURL = (import.meta as any).env[`VITE_${envPrefix}_BASE_URL`];
-
-        if (!apiKey || !baseURL) {
-            throw new Error(`未配置环境变量: VITE_${envPrefix}_API_KEY 或 BASE_URL`);
-        }
-
-        // 动态导入 OpenAI 以优化首屏加载
-        const { default: OpenAI } = await import('openai');
-
-        const client = new OpenAI({
-            baseURL,
-            apiKey,
-            dangerouslyAllowBrowser: true
-        });
-
-        // 转换历史记录格式
-        const messages = [
-            { role: "system", content: systemInstruction },
-            ...apiHistory.map(msg => ({
-                role: msg.role === 'model' ? 'assistant' : 'user',
-                content: msg.content
-            }))
-        ];
-
-        const response = await client.chat.completions.create({
-            model: modelId,
-            messages: messages as any,
-            temperature: 0.7,
-        });
-
-        return response.choices[0].message.content || "无回复";
+        return await callOpenAICompatible(modelId, apiHistory, systemInstruction, selectedModel.envKey);
     }
 
     throw new Error("不支持的模型提供商");
@@ -151,12 +155,10 @@ export const sendChatMessage = async (history: ChatMessage[], modelId: string): 
 
 
 export const analyzeMealSafety = async (files: File[], modelId: string, additionalInfo: string): Promise<string> => {
-  
-  // 1. 获取当前模型配置
   const selectedModel = models.find(m => m.id === modelId);
   if (!selectedModel) throw new Error("未找到模型配置");
 
-  // ================= 准备提示词 (Prompts) =================
+  // Prompt 构建
   const dbInstruction = `**内部产品数据库：**
 你有一个内部产品数据库，其中包含已知产品的详细信息。这是数据库的内容：
 \`\`\`json
@@ -232,35 +234,44 @@ ${dbInstruction}
 
   const userPrompt = `这是我需要你分析的预制菜。补充信息如下：\n\n${additionalInfo || '无补充信息。'}`;
 
-  // ================= 厂商分流逻辑 =================
-
-  // 🔴 1. Google Gemini
+  // 🔴 1. Google Gemini (Native Fetch)
   if (selectedModel.provider === ModelProvider.GOOGLE) {
-    const ai = getGoogleAI();
+    const parts: any[] = [{ text: userPrompt }];
     
-    const imageParts = await Promise.all(
-      files.map(async (file) => {
-        const base64Data = await fileToBase64(file); // Gemini 只需要纯 Base64
-        return {
-          inlineData: { mimeType: file.type, data: base64Data },
-        };
-      })
-    );
+    // 处理图片
+    for (const file of files) {
+        const base64Data = await fileToBase64(file);
+        parts.push({
+            inlineData: {
+                mimeType: file.type,
+                data: base64Data
+            }
+        });
+    }
 
-    const response = await ai.models.generateContent({
-      model: modelId,
-      contents: { parts: [{ text: userPrompt }, ...imageParts] },
-      config: { systemInstruction }
-    });
-
-    return response.text || "未生成内容";
+    const contents = [{ role: 'user', parts: parts }];
+    return await callGeminiFetch(modelId, contents, systemInstruction);
   }
 
-  // 🔵 2. OpenAI 兼容厂商 (DeepSeek / Qwen / Doubao / ChatGPT)
+  // 🔵 2. OpenAI 兼容厂商
   else if (selectedModel.provider === ModelProvider.OPENAI) {
-    
-    // 动态获取 API Key 和 URL
-    const envPrefix = selectedModel.envKey || 'LLM'; 
+    // 复用之前的逻辑
+    return await callOpenAICompatible(modelId, [], systemInstruction, selectedModel.envKey, userPrompt, files);
+  }
+
+  throw new Error("不支持的模型提供商");
+};
+
+// 辅助：提取 OpenAI 逻辑以保持代码整洁
+async function callOpenAICompatible(
+    modelId: string, 
+    history: ChatMessage[], 
+    systemInstruction: string, 
+    envKey?: string,
+    prompt?: string,
+    files?: File[]
+) {
+    const envPrefix = envKey || 'LLM'; 
     const apiKey = (import.meta as any).env[`VITE_${envPrefix}_API_KEY`];
     const baseURL = (import.meta as any).env[`VITE_${envPrefix}_BASE_URL`];
 
@@ -268,39 +279,44 @@ ${dbInstruction}
       throw new Error(`未配置环境变量: VITE_${envPrefix}_API_KEY 或 BASE_URL`);
     }
 
-    // Dynamic import for OpenAI
     const { default: OpenAI } = await import('openai');
+    const client = new OpenAI({ baseURL, apiKey, dangerouslyAllowBrowser: true });
 
-    const client = new OpenAI({
-      baseURL,
-      apiKey,
-      dangerouslyAllowBrowser: true
-    });
+    let messages: any[] = [
+        { role: "system", content: systemInstruction }
+    ];
 
-    const imageMessages = await Promise.all(
-      files.map(async (file) => {
-        const rawBase64 = await fileToBase64(file);
-        return {
-          type: "image_url" as const,
-          image_url: {
-            url: `data:${file.type};base64,${rawBase64}`, // OpenAI 需要 Data URL 前缀
-            detail: "high" as const
-          }
-        };
-      })
-    );
+    // 处理历史记录
+    if (history.length > 0) {
+        messages = messages.concat(history.map(msg => ({
+            role: msg.role === 'model' ? 'assistant' : 'user',
+            content: msg.content
+        })));
+    }
+
+    // 处理当前 Prompt 和 图片 (如果是分析模式)
+    if (prompt) {
+        const contentParts: any[] = [{ type: "text", text: prompt }];
+        if (files) {
+             for (const file of files) {
+                const rawBase64 = await fileToBase64(file);
+                contentParts.push({
+                    type: "image_url",
+                    image_url: {
+                        url: `data:${file.type};base64,${rawBase64}`,
+                        detail: "high"
+                    }
+                });
+             }
+        }
+        messages.push({ role: "user", content: contentParts });
+    }
 
     const response = await client.chat.completions.create({
-      model: modelId, // 例如 'qwen-plus'
-      messages: [
-        { role: "system", content: systemInstruction + "\n\n" + dbInstruction },
-        { role: "user", content: [{ type: "text", text: userPrompt }, ...imageMessages] }
-      ],
+      model: modelId,
+      messages: messages as any,
       temperature: 0.7,
     });
 
-    return response.choices[0].message.content || "未生成内容";
-  }
-
-  throw new Error("不支持的模型提供商");
-};
+    return response.choices[0].message.content || "无回复";
+}
