@@ -1,38 +1,41 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import pako from 'pako';
 import { FileUpload } from './components/FileUpload';
 import { ResultDisplay } from './components/ResultDisplay';
 import { HistoryModal } from './components/HistoryModal';
 import { AnalysisChatModal } from './components/AnalysisChatModal'; 
+import { SettingsModal } from './components/SettingsModal';
 import { models } from './constants';
 import { analyzeMealSafety } from './services/aiService';
 import { addReportToHistory, ReportHistoryItem } from './utils/history';
 
 const App: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
-  // 修改 1: 默认选中配置列表中的第一个模型 (ID 字符串)
   const [model, setModel] = useState<string>(models[0].id);
+  
+  // 核心变更：补充信息和辅助文件现在由 App 管理，但在 ChatModal 中编辑
   const [additionalInfo, setAdditionalInfo] = useState('');
+  const [supportingFiles, setSupportingFiles] = useState<File[]>([]);
+  
   const [analysisResult, setAnalysisResult] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false); 
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const reportData = urlParams.get('report');
     if (reportData) {
       try {
-        // URL-safe base64 decoding
         const base64 = reportData.replace(/-/g, '+').replace(/_/g, '/');
         const compressed = atob(base64);
         const charData = compressed.split('').map(x => x.charCodeAt(0));
         const binData = new Uint8Array(charData);
         const decompressed = pako.inflate(binData, { to: 'string' });
         setAnalysisResult(decompressed);
-        // Clean the URL
         window.history.replaceState({}, document.title, window.location.pathname);
       } catch (e) {
         console.error("Failed to decode report from URL", e);
@@ -52,8 +55,8 @@ const App: React.FC = () => {
     setAnalysisResult('');
 
     try {
-      // 调用分析服务 (传入 string 类型的 model ID)
-      const result = await analyzeMealSafety(files, model, additionalInfo);
+      // 传入 supportingFiles
+      const result = await analyzeMealSafety(files, model, additionalInfo, supportingFiles);
       setAnalysisResult(result);
       
       const newReport: ReportHistoryItem = {
@@ -61,7 +64,7 @@ const App: React.FC = () => {
         title: result.split('\n')[1]?.replace('#', '').trim() || '分析报告',
         date: new Date().toLocaleString('zh-CN'),
         content: result,
-        model: model, // 保存模型 ID
+        model: model,
       };
       addReportToHistory(newReport);
 
@@ -74,14 +77,14 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [files, model, additionalInfo]);
+  }, [files, model, additionalInfo, supportingFiles]);
 
   const handleSelectReportFromHistory = (reportContent: string) => {
     setAnalysisResult(reportContent);
     setIsHistoryOpen(false);
-    // Reset inputs for clarity
     setFiles([]);
     setAdditionalInfo('');
+    setSupportingFiles([]);
     setError(null);
     setIsLoading(false);
   };
@@ -93,24 +96,6 @@ const App: React.FC = () => {
         <path d="M9 12l2 2 4-4" />
       </svg>
     </div>
-  );
-  
-  const HistoryIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-  
-  const ChartIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-    </svg>
-  );
-
-  const ExternalLinkIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-    </svg>
   );
 
   return (
@@ -130,18 +115,23 @@ const App: React.FC = () => {
             </div>
             <div className="flex gap-2">
                 <button 
-                onClick={() => setIsChatOpen(true)} 
-                className="flex items-center text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 px-3 py-2 rounded-md transition-all text-sm font-semibold"
+                  onClick={() => setIsSettingsOpen(true)}
+                  className="flex items-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-3 py-2 rounded-md transition-all text-sm font-semibold border border-transparent hover:border-slate-200"
                 >
-                <ChartIcon />
-                检测数据统计分析
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  API 配置
                 </button>
                 <button 
-                onClick={() => setIsHistoryOpen(true)} 
-                className="flex items-center text-slate-600 hover:text-cyan-700 hover:bg-cyan-50 px-3 py-2 rounded-md transition-all text-sm font-semibold"
+                  onClick={() => setIsHistoryOpen(true)} 
+                  className="flex items-center text-slate-600 hover:text-cyan-700 hover:bg-cyan-50 px-3 py-2 rounded-md transition-all text-sm font-semibold"
                 >
-                <HistoryIcon />
-                历史记录
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  历史记录
                 </button>
             </div>
           </div>
@@ -156,36 +146,8 @@ const App: React.FC = () => {
                 智能食品安全分析
               </h2>
               <p className="text-slate-600 leading-relaxed">
-                上传预制菜的实物图片、包装信息或检测报告，我们的 AI 智能体将深度分析产品生产信息、供应链溯源及潜在风险点，为您提供专业的安全评估报告。
+                上传预制菜的实物图片，并配置相关检测文档（PDF/Word/Excel），我们的 AI 智能体将深度分析潜在风险点，为您提供专业的安全评估报告。
               </p>
-            </div>
-
-            {/* Official Links */}
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-               <a 
-                  href="https://sdsl.amr.shandong.gov.cn/login" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="group flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-cyan-400 hover:bg-cyan-50/50 hover:shadow-sm transition-all duration-200"
-                >
-                  <span className="flex items-center font-semibold text-slate-700 group-hover:text-cyan-800">
-                    <span className="w-2 h-2 rounded-full bg-cyan-500 mr-3"></span>
-                    山东省食品信息化追溯平台
-                  </span>
-                  <ExternalLinkIcon />
-                </a>
-                <a 
-                  href="http://117.73.254.122:8099" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="group flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-cyan-400 hover:bg-cyan-50/50 hover:shadow-sm transition-all duration-200"
-                >
-                  <span className="flex items-center font-semibold text-slate-700 group-hover:text-cyan-800">
-                    <span className="w-2 h-2 rounded-full bg-cyan-500 mr-3"></span>
-                    山东冷链食品疫情防控系统
-                  </span>
-                  <ExternalLinkIcon />
-                </a>
             </div>
           </section>
 
@@ -195,12 +157,9 @@ const App: React.FC = () => {
               <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 h-full flex flex-col">
                 <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
                   <span className="bg-slate-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">1</span>
-                  上传图片
+                  上传图片 (实物/包装)
                 </h3>
                 <FileUpload files={files} setFiles={setFiles} />
-                <p className="text-xs text-slate-400 mt-3">
-                  * 为了获得最准确的分析，请确保图片清晰，包含产品标签或检测报告文字。
-                </p>
               </section>
             </div>
 
@@ -215,7 +174,6 @@ const App: React.FC = () => {
                   <div>
                     <label htmlFor="model-select" className="block text-sm font-semibold text-slate-700 mb-2">选择分析模型</label>
                     <div className="relative">
-                      {/* 修改 2: 更新下拉菜单逻辑以支持多厂商显示 */}
                       <select
                         id="model-select"
                         value={model}
@@ -228,22 +186,47 @@ const App: React.FC = () => {
                           </option>
                         ))}
                       </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                      </div>
                     </div>
                   </div>
                   
+                  {/* 新的合并区域：补充信息与文档 */}
                   <div>
-                    <label htmlFor="additional-info" className="block text-sm font-semibold text-slate-700 mb-2">补充信息 (可选)</label>
-                    <textarea
-                      id="additional-info"
-                      value={additionalInfo}
-                      onChange={(e) => setAdditionalInfo(e.target.value)}
-                      placeholder="请输入产品名称、购买地点、或者您特别担心的风险点..."
-                      rows={5}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all resize-none"
-                    />
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">补充信息与辅助文档</label>
+                    <div 
+                      onClick={() => setIsChatOpen(true)}
+                      className="group cursor-pointer bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 border-dashed rounded-xl p-4 transition-all"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-indigo-600 flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                          配置上下文 & 智能助手
+                        </span>
+                        <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
+                           点击编辑
+                        </span>
+                      </div>
+                      
+                      <div className="text-sm text-slate-500 line-clamp-2 min-h-[1.5em]">
+                        {additionalInfo || "暂无文字补充信息..."}
+                      </div>
+                      
+                      {supportingFiles.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {supportingFiles.map((f, i) => (
+                            <span key={i} className="inline-flex items-center gap-1 text-xs bg-white border border-slate-200 px-2 py-1 rounded-md text-slate-600">
+                              <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                              {f.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {supportingFiles.length === 0 && (
+                        <div className="mt-2 text-xs text-slate-400">
+                          暂无文档 (支持 PDF, Word, Excel)
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <button
@@ -301,26 +284,18 @@ const App: React.FC = () => {
             <p className="text-sm text-slate-500">
               © 2024 预制菜安全检测智能体. All rights reserved.
             </p>
-            <p className="text-xs text-slate-400 mt-2 max-w-2xl mx-auto leading-relaxed">
-              免责声明：本工具仅供参考。AI 分析结果基于您提供的图片和信息生成，可能存在误差。
-              本报告不具备法律效力，不能替代官方检测机构的正式检验报告。对于高风险食品安全问题，请务必咨询专业机构或相关部门。
-            </p>
           </div>
         </footer>
       </div>
       
-      {/* Floating Chat Button - High Visibility */}
+      {/* Floating Chat Button */}
       <button
         onClick={() => setIsChatOpen(true)}
-        className="fixed bottom-8 right-8 z-50 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-full p-5 shadow-2xl shadow-indigo-500/50 flex items-center justify-center transition-all hover:scale-110 active:scale-95 group ring-4 ring-white/30"
-        aria-label="打开检测数据统计分析"
+        className="fixed bottom-8 right-8 z-40 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-full p-4 shadow-xl shadow-indigo-500/40 flex items-center justify-center transition-all hover:scale-105 active:scale-95 group"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
         </svg>
-        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap group-hover:ml-3 font-bold text-lg">
-          检测数据统计分析
-        </span>
       </button>
 
       <HistoryModal 
@@ -329,10 +304,20 @@ const App: React.FC = () => {
         onSelectReport={handleSelectReportFromHistory}
       />
 
+      {/* 传递上下文和文档状态到 Chat Modal */}
       <AnalysisChatModal
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
         currentModelId={model}
+        additionalInfo={additionalInfo}
+        setAdditionalInfo={setAdditionalInfo}
+        supportingFiles={supportingFiles}
+        setSupportingFiles={setSupportingFiles}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
       />
     </>
   );
