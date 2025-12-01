@@ -18,10 +18,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   }, [isOpen]);
 
   const handleSave = () => {
+    // 简单的校验提醒
+    if (apiKey.startsWith('sk-') && !baseUrl) {
+        if (!confirm('检测到您使用了 sk- 开头的 Key（通常是中转 Key），但未填写 Base URL。\n\n如果不填写 Base URL，请求将直接发往 Google 官方，可能会失败。\n\n是否继续保存？')) {
+            return;
+        }
+    }
+
     localStorage.setItem('custom_api_key', apiKey.trim());
     localStorage.setItem('custom_base_url', baseUrl.trim());
     
-    // 强制刷新页面以应用新配置（简单有效）
+    // 强制刷新页面以应用新配置
     setShowSuccess(true);
     setTimeout(() => {
       setShowSuccess(false);
@@ -43,6 +50,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         </div>
         
         <div className="p-6 space-y-5">
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+             提示：在 Vercel 环境下，请在此处手动填写配置以覆盖默认设置。
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">API Key (必填)</label>
             <input 
@@ -52,21 +63,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               placeholder="sk-..."
               className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all"
             />
-            <p className="text-xs text-slate-400 mt-1">您的密钥仅保存在本地浏览器中，不会上传到我们的服务器。</p>
+            <p className="text-xs text-slate-400 mt-1">通常以 sk- 开头（如果是中转）或 AIza 开头（如果是 Google 原生）。</p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Base URL (可选)</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Base URL (中转必填)</label>
             <input 
               type="text" 
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
-              placeholder="例如: https://api.openai-proxy.org/google/v1beta"
+              placeholder="https://api.openai-proxy.org/google"
               className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all"
             />
             <p className="text-xs text-slate-400 mt-1">
-              如果您使用中转服务，请在此填写代理地址。<br/>
-              注意: 大多数代理需要包含 <code>/v1beta</code> 后缀。
+              请填写您的中转接口地址。系统会自动追加 <code>/v1beta</code>。<br/>
+              <span className="text-red-500">注意：如果不填写，将默认请求 Google 官方地址。</span>
             </p>
           </div>
 
