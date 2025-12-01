@@ -1,0 +1,5 @@
+{
+  "name": "Pre-packaged Meal Safety Detection Agent",
+  "description": "An AI-powered tool to analyze pre-packaged meal photos and lab reports, providing insights into production, supply chain, and potential safety risks.",
+  "requestFramePermissions": []
+}
