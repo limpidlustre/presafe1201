@@ -151,10 +151,45 @@ const App: React.FC = () => {
             </div>
           </section>
 
+          {/* 监管平台链接 (新位置) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <a 
+                href="https://sdsl.amr.shandong.gov.cn/login" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group"
+              >
+                <div className="bg-blue-50 p-3 rounded-lg mr-4 group-hover:bg-blue-100 transition-colors">
+                   <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors">山东省食用农产品和食品信息化追溯平台</h4>
+                  <p className="text-xs text-slate-500 mt-1">sdsl.amr.shandong.gov.cn</p>
+                </div>
+                <svg className="w-5 h-5 text-slate-300 ml-auto group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+             </a>
+
+             <a 
+                href="http://117.73.254.122:8099/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-cyan-200 transition-all group"
+              >
+                <div className="bg-cyan-50 p-3 rounded-lg mr-4 group-hover:bg-cyan-100 transition-colors">
+                   <svg className="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800 text-sm group-hover:text-cyan-700 transition-colors">山东冷链食品疫情防控管理系统</h4>
+                  <p className="text-xs text-slate-500 mt-1">117.73.254.122:8099</p>
+                </div>
+                <svg className="w-5 h-5 text-slate-300 ml-auto group-hover:text-cyan-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+             </a>
+          </div>
+
           {/* Analysis Form */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-6">
-              <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 h-full flex flex-col">
+              <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col h-full">
                 <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
                   <span className="bg-slate-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">1</span>
                   上传图片 (实物/包装)
