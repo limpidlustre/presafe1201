@@ -24,17 +24,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ files, setFiles }) => {
 
   const handleFiles = useCallback((incomingFiles: FileList | null) => {
     if (incomingFiles) {
-      const allowedTypes = [
-        'image/png', 'image/jpeg', 'image/webp', 
-        'application/pdf',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
-        'application/msword', // doc
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
-        'application/vnd.ms-excel' // xls
-      ];
-      
       const newFiles = Array.from(incomingFiles);
-      // 简单过滤，或者在后续处理中提示
       setFiles(prev => [...prev, ...newFiles]);
     }
   }, [setFiles]);
@@ -68,27 +58,29 @@ export const FileUpload: React.FC<FileUploadProps> = ({ files, setFiles }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+    <div className="flex flex-col h-full bg-[#131522]/60 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 overflow-hidden group transition-all hover:border-white/20">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-        <h3 className="font-bold text-slate-800 flex items-center gap-2">
-          <svg className="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+      <div className="px-6 py-5 border-b border-white/5 bg-white/5 flex flex-col gap-1">
+        <h3 className="font-bold text-slate-100 flex items-center gap-2 text-lg">
+          <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
           文件上传区
         </h3>
-        <p className="text-xs text-slate-400 mt-1">支持图片、PDF、Word、Excel</p>
+        <p className="text-xs text-slate-400">支持图片、PDF、Word、Excel</p>
       </div>
 
-      {/* List Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar min-h-[200px]">
+      {/* List Area - Dark Themed */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar min-h-[250px]">
         {files.length === 0 ? (
-           <div className="h-full flex flex-col items-center justify-center text-slate-300 space-y-2 opacity-60">
-              <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>
-              <span className="text-sm">暂无文件</span>
+           <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-4">
+              <div className="w-16 h-16 border-2 border-dashed border-slate-600 rounded-2xl flex items-center justify-center">
+                 <svg className="w-8 h-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+              </div>
+              <span className="text-sm font-medium">暂无文件</span>
            </div>
         ) : (
           filePreviews.map((file, idx) => (
-            <div key={idx} className="group relative flex items-center gap-3 p-3 bg-slate-50 hover:bg-indigo-50 rounded-xl border border-slate-100 hover:border-indigo-100 transition-all">
-               <div className="w-12 h-12 flex-shrink-0 bg-white rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden">
+            <div key={idx} className="group/item relative flex items-center gap-3 p-3 bg-[#0B0C15] hover:bg-[#1A1D2D] rounded-xl border border-white/5 hover:border-amber-500/30 transition-all shadow-sm">
+               <div className="w-12 h-12 flex-shrink-0 bg-[#1e2130] rounded-lg flex items-center justify-center overflow-hidden border border-white/5">
                   {file.url ? (
                     <img src={file.url} alt="preview" className="w-full h-full object-cover" />
                   ) : (
@@ -96,12 +88,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({ files, setFiles }) => {
                   )}
                </div>
                <div className="flex-1 min-w-0">
-                 <p className="text-sm font-medium text-slate-700 truncate" title={file.name}>{file.name}</p>
-                 <p className="text-xs text-slate-400 uppercase">{file.name.split('.').pop()}</p>
+                 <p className="text-sm font-medium text-slate-200 truncate" title={file.name}>{file.name}</p>
+                 <p className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">{file.name.split('.').pop()}</p>
                </div>
                <button 
                  onClick={() => removeFile(idx)}
-                 className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-white rounded-full transition-all"
+                 className="opacity-0 group-hover/item:opacity-100 p-2 text-slate-400 hover:text-red-400 hover:bg-white/5 rounded-full transition-all"
                >
                  <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
                </button>
@@ -111,10 +103,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({ files, setFiles }) => {
       </div>
 
       {/* Drop Zone */}
-      <div className="p-4 border-t border-slate-100 bg-white">
+      <div className="p-4 border-t border-white/5 bg-white/[0.02]">
         <label
-          className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${
-            isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'
+          className={`flex flex-col items-center justify-center p-6 border border-dashed rounded-2xl cursor-pointer transition-all ${
+            isDragging ? 'border-amber-500 bg-amber-500/10' : 'border-slate-600 hover:border-amber-500/50 hover:bg-[#1A1D2D]'
           }`}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
@@ -122,8 +114,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ files, setFiles }) => {
           onDrop={handleDrop}
         >
           <input type="file" multiple className="hidden" onChange={handleFileChange} />
-          <svg className="w-8 h-8 text-indigo-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h10a4 4 0 014 4v5a4 4 0 01-4 4H7z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11V3m0 8l-3-3m3 3l3-3" /></svg>
-          <span className="text-sm font-bold text-indigo-600">点击或拖拽上传</span>
+          <svg className="w-6 h-6 text-amber-500/80 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h10a4 4 0 014 4v5a4 4 0 01-4 4H7z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11V3m0 8l-3-3m3 3l3-3" /></svg>
+          <span className="text-xs font-bold text-amber-500 tracking-wide">点击或拖拽上传</span>
         </label>
       </div>
     </div>

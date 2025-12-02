@@ -1,4 +1,4 @@
-import { models } from '../constants';
+import { GoogleGenAI } from "@google/genai";
 import { products } from './productData';
 
 // 声明全局库 (由 index.html 引入)
@@ -9,21 +9,6 @@ export interface ChatMessage {
   role: 'user' | 'model';
   content: string;
 }
-
-const getConfig = () => {
-  const apiKey = typeof window !== 'undefined' ? localStorage.getItem('custom_api_key') : null;
-  const envApiKey = (import.meta as any).env.VITE_GEMINI_API_KEY || process.env.API_KEY;
-  const localBaseUrl = typeof window !== 'undefined' ? localStorage.getItem('custom_base_url') : null;
-  const envBaseUrl = (import.meta as any).env.VITE_GEMINI_BASE_URL;
-
-  const finalApiKey = apiKey || envApiKey;
-  let finalBaseUrl = localBaseUrl || envBaseUrl || 'https://generativelanguage.googleapis.com/v1beta';
-
-  if (finalBaseUrl.endsWith('/')) finalBaseUrl = finalBaseUrl.slice(0, -1);
-  if (!finalBaseUrl.includes('v1beta') && !finalBaseUrl.includes('/v1/')) finalBaseUrl = `${finalBaseUrl}/v1beta`;
-
-  return { apiKey: finalApiKey, baseUrl: finalBaseUrl };
-};
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -106,50 +91,6 @@ const processFilesForGemini = async (files: File[]) => {
     return parts;
 };
 
-const callGeminiFetch = async (modelId: string, contents: any[], systemInstructionText?: string) => {
-    const { apiKey, baseUrl } = getConfig();
-    if (!apiKey) throw new Error("未配置 API Key。请点击右上角 'API 配置' 按钮进行设置。");
-
-    const url = `${baseUrl}/models/${modelId}:generateContent?key=${apiKey}`;
-    console.log("Request URL:", url);
-
-    const body: any = {
-        contents: contents,
-        generationConfig: { temperature: 0.7 }
-    };
-
-    if (systemInstructionText) {
-        body.systemInstruction = { parts: [{ text: systemInstructionText }] };
-    }
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-
-        if (!response.ok) {
-            const errText = await response.text();
-            let errMsg = `API 请求失败 (${response.status})`;
-            try {
-                const jsonErr = JSON.parse(errText);
-                if (jsonErr.error && jsonErr.error.message) errMsg = `API 错误: ${jsonErr.error.message}`;
-            } catch (e) {
-                errMsg += `: ${errText.substring(0, 100)}`;
-            }
-            throw new Error(errMsg);
-        }
-
-        const data = await response.json();
-        if (data.promptFeedback?.blockReason) throw new Error(`生成被拦截: ${data.promptFeedback.blockReason}`);
-        return data.candidates?.[0]?.content?.parts?.[0]?.text || "API 未返回有效内容";
-    } catch (error: any) {
-        console.error("Gemini Fetch Error:", error);
-        throw error;
-    }
-};
-
 const REPORT_TEMPLATE = `
 请严格按照以下 Markdown 表格格式输出报告。不要修改表头，不要合并单元格，每一行都要完整填写。如果某项没有数据，请填写'/'。
 "检测结果"列只能填写：合格、不合格、待复检。
@@ -157,7 +98,18 @@ const REPORT_TEMPLATE = `
 | 类别 | 项目名称 | 填写内容 | 检测结果(合格/不合格/待复检) |
 |---|---|---|---|
 | 产品基础信息 | 产品 ID | | |
-| ... (保持原有详细模板内容，省略以节省空间) ...
+| 产品基础信息 | 产品名称 | | |
+| 产品基础信息 | 生产商 | | |
+| 产品基础信息 | 产地 | | |
+| 原料与配料分析 | 主要原料来源 | | |
+| 原料与配料分析 | 潜在过敏原 | | |
+| 原料与配料分析 | 食品添加剂合规性 | | |
+| 生产与包装分析 | 生产许可证号 | | |
+| 生产与包装分析 | 包装材料合规性 | | |
+| 生产与包装分析 | 生产日期与保质期 | | |
+| 风险评估与建议 | 综合风险等级 | | |
+| 风险评估与建议 | 关键风险点 | | |
+| 风险评估与建议 | 改进建议 | | |
 | 附加信息 | 备注(异常情况说明) | | / |
 `;
 
@@ -170,34 +122,82 @@ export const analyzeMealSafety = async (
     userInput: string,
     mode: 'report' | 'chat'
 ): Promise<string> => {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
-  // 根据模式决定 Prompt
-  let systemInstruction = '';
-  let userPrompt = '';
+    // 根据模式决定 Prompt
+    let systemInstruction = '';
+    let userPrompt = '';
 
-  if (mode === 'report') {
-      systemInstruction = `你是一个专业的预制菜安全分析师。请基于提供的文件（图片、文档）和用户输入进行综合分析。
-      **重要：你必须严格输出 Markdown 表格，格式如下：**
-      ${REPORT_TEMPLATE}
-      请务必确保每一列都对齐。
-      ${getProductContext()}`;
-      userPrompt = `请分析上传的文件。补充说明：${userInput || '无'}。请生成《预制菜安全检测 AI 分析报告》。`;
-  } else {
-      systemInstruction = `你是一个全能助手，也是预制菜领域的专家。请根据用户提供的图片、文档和问题进行回答。
-      ${getProductContext()}`;
-      userPrompt = userInput || "请分析这些文件。";
-  }
+    if (mode === 'report') {
+        systemInstruction = `你是一个专业的预制菜安全分析师。请基于提供的文件（图片、文档）和用户输入进行综合分析。
+        **重要：你必须严格输出 Markdown 表格，格式如下：**
+        ${REPORT_TEMPLATE}
+        请务必确保每一列都对齐。
+        ${getProductContext()}`;
+        userPrompt = `请分析上传的文件。补充说明：${userInput || '无'}。请生成《预制菜安全检测 AI 分析报告》。`;
+    } else {
+        systemInstruction = `你是一个全能助手，也是预制菜领域的专家。请根据用户提供的图片、文档和问题进行回答。
+        ${getProductContext()}`;
+        userPrompt = userInput || "请分析这些文件。";
+    }
 
-  // 处理所有文件
-  const fileParts = await processFilesForGemini(allFiles);
+    // 处理所有文件
+    const fileParts = await processFilesForGemini(allFiles);
 
-  const contents = [{
-      role: 'user',
-      parts: [
-          { text: userPrompt },
-          ...fileParts
-      ]
-  }];
+    const response = await ai.models.generateContent({
+        model: modelId,
+        contents: {
+            role: 'user',
+            parts: [
+                { text: userPrompt },
+                ...fileParts
+            ]
+        },
+        config: {
+            systemInstruction: systemInstruction,
+            temperature: 0.7
+        }
+    });
 
-  return callGeminiFetch(modelId, contents, systemInstruction);
+    return response.text || "API 未返回有效内容";
+};
+
+export const sendChatMessage = async (
+    history: ChatMessage[],
+    modelId: string,
+    supportingFiles: File[]
+): Promise<string> => {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+    const fileParts = await processFilesForGemini(supportingFiles);
+    
+    // Construct contents from history
+    const contents = history.map((msg, index) => {
+        const isLast = index === history.length - 1;
+        const parts: any[] = [{ text: msg.content }];
+        
+        if (isLast && msg.role === 'user' && fileParts.length > 0) {
+            // Attach files to the latest user message
+            parts.push(...fileParts);
+        }
+        
+        return {
+            role: msg.role,
+            parts: parts
+        };
+    });
+
+    const systemInstruction = `你是一个全能助手，也是预制菜领域的专家。请根据用户提供的图片、文档和对话历史进行回答。
+    ${getProductContext()}`;
+
+    const response = await ai.models.generateContent({
+        model: modelId,
+        contents: contents,
+        config: {
+            systemInstruction: systemInstruction,
+            temperature: 0.7
+        }
+    });
+
+    return response.text || "API 未返回有效内容";
 };
