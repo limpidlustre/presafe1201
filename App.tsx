@@ -46,7 +46,7 @@ const App: React.FC = () => {
   }, [files, model, inputText]);
 
   const HeaderIcon = () => (
-    <div className="bg-gradient-to-tr from-purple-600 to-blue-600 p-2 rounded-lg shadow-[0_0_15px_rgba(124,58,237,0.5)]">
+    <div className="bg-gradient-to-br from-blue-600 to-cyan-500 p-2 rounded-xl shadow-lg shadow-blue-500/20">
       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
@@ -55,33 +55,35 @@ const App: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-[#0B0C15] font-sans text-slate-200 flex flex-col overflow-x-hidden selection:bg-purple-500/30 selection:text-purple-200">
+      <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-800 flex flex-col overflow-x-hidden relative">
         
-        {/* 背景光效 */}
-        <div className="fixed inset-0 pointer-events-none z-0">
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px]"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[120px]"></div>
-            <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] bg-indigo-900/10 rounded-full blur-[80px]"></div>
+        {/* 亮丽的背景光效 */}
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+            <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-blue-100/50 rounded-full blur-[100px] mix-blend-multiply"></div>
+            <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-cyan-100/60 rounded-full blur-[100px] mix-blend-multiply"></div>
+            <div className="absolute top-[30%] left-[20%] w-[400px] h-[400px] bg-indigo-50/80 rounded-full blur-[80px]"></div>
         </div>
 
         {/* Navbar */}
-        <nav className="bg-[#131522]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-40">
+        <nav className="bg-white/70 backdrop-blur-xl border-b border-blue-100 sticky top-0 z-40 transition-all duration-300">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between py-3">
             <div className="flex items-center gap-3">
               <HeaderIcon />
-              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-wide">
-                预制菜安全检测智能体
+              <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">
+                预制菜<span className="text-blue-600">安全检测</span>智能体
               </h1>
             </div>
             
             <button 
               onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white rounded-full transition-all text-sm font-medium border border-white/5 hover:border-white/20 backdrop-blur-sm"
+              className="group flex items-center gap-2 px-4 py-2 bg-white hover:bg-blue-50 text-slate-600 hover:text-blue-700 rounded-full transition-all text-sm font-semibold border border-slate-200 hover:border-blue-200 shadow-sm hover:shadow-md"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+              <div className="p-1 rounded-full bg-slate-100 group-hover:bg-blue-100 text-slate-500 group-hover:text-blue-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
               API 配置
             </button>
           </div>
@@ -91,34 +93,35 @@ const App: React.FC = () => {
         <main className="relative z-10 flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
           
           {/* 1. 智能体介绍 & 监管平台入口 (Hero Section) */}
-          <section className="text-center space-y-8 py-4">
+          <section className="text-center space-y-8 py-6">
             <div className="space-y-4">
-              <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 tracking-tight drop-shadow-sm">
-                智能食品安全分析
+              <h2 className="text-4xl sm:text-5xl font-black text-slate-800 tracking-tight drop-shadow-sm">
+                智能识别，<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">守护舌尖安全</span>
               </h2>
-              <p className="text-slate-400 max-w-2xl mx-auto text-base leading-relaxed">
-                上传预制菜实物图片、检测报告或相关文档，AI 智能体将为您进行全方位的风险评估与合规性检测。
+              <p className="text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed font-medium">
+                AI 驱动的预制菜全链路风险评估系统，一键上传，即刻分析。
               </p>
             </div>
 
-            {/* 监管平台链接 (Style: Cyberpunk/Tech Pills) */}
-            <div className="flex flex-wrap justify-center items-center gap-6">
+            {/* 监管平台链接 & 云端统计 */}
+            <div className="flex flex-wrap justify-center items-center gap-4">
                 <a 
                   href="https://sdsl.amr.shandong.gov.cn/login" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-6 py-3 bg-[#1A1D2D]/80 hover:bg-[#252A40] border border-blue-500/30 hover:border-blue-400 rounded-full text-base font-bold text-blue-100 hover:text-white transition-all shadow-[0_0_10px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] group backdrop-blur-md"
+                  className="flex items-center gap-3 px-6 py-3 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-full text-base font-bold text-slate-700 hover:text-blue-700 transition-all shadow-sm hover:shadow-lg hover:-translate-y-0.5 group"
                 >
-                  <span className="w-2 h-2 bg-blue-400 rounded-full shadow-[0_0_8px_rgba(96,165,250,0.8)] group-hover:animate-pulse"></span>
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                     <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
                   山东省食用农产品和食品信息化追溯平台
-                  <svg className="w-4 h-4 text-slate-400 group-hover:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </a>
 
-                {/* 新增的装饰性按钮 */}
+                {/* 云端数据统计按钮 (展示用) */}
                 <div 
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-indigo-500/30 rounded-full text-base font-bold text-indigo-200 cursor-default shadow-[0_0_15px_rgba(99,102,241,0.1)] backdrop-blur-md select-none"
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full text-base font-bold shadow-lg shadow-blue-500/30 cursor-default select-none ring-4 ring-blue-100"
                 >
-                  <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                  <svg className="w-5 h-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                   云端数据统计
                 </div>
 
@@ -126,11 +129,12 @@ const App: React.FC = () => {
                   href="http://117.73.254.122:8099/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-6 py-3 bg-[#1A1D2D]/80 hover:bg-[#252A40] border border-cyan-500/30 hover:border-cyan-400 rounded-full text-base font-bold text-cyan-100 hover:text-white transition-all shadow-[0_0_10px_rgba(34,211,238,0.1)] hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] group backdrop-blur-md"
+                  className="flex items-center gap-3 px-6 py-3 bg-white hover:bg-cyan-50 border border-slate-200 hover:border-cyan-300 rounded-full text-base font-bold text-slate-700 hover:text-cyan-700 transition-all shadow-sm hover:shadow-lg hover:-translate-y-0.5 group"
                 >
-                  <span className="w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_8px_rgba(34,211,238,0.8)] group-hover:animate-pulse"></span>
+                  <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center group-hover:bg-cyan-200 transition-colors">
+                     <svg className="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  </div>
                   山东冷链食品疫情防控管理系统
-                  <svg className="w-4 h-4 text-slate-400 group-hover:text-cyan-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </a>
             </div>
           </section>
@@ -146,26 +150,26 @@ const App: React.FC = () => {
             {/* Right Column: Controls & Output (65%) */}
             <div className="lg:col-span-8 flex flex-col gap-6">
               
-              {/* Control Panel Card - Glassmorphism Dark */}
-              <div className="bg-[#131522]/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 space-y-6 shadow-2xl relative overflow-hidden group">
+              {/* Control Panel Card - Glassmorphism Light */}
+              <div className="bg-white/80 backdrop-blur-xl border border-white rounded-3xl p-8 space-y-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
                 
-                {/* 装饰光效 */}
-                <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-600/5 rounded-full blur-[80px] pointer-events-none"></div>
+                {/* 装饰背景 */}
+                <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-blue-50 rounded-bl-full -z-10 transition-transform group-hover:scale-110 duration-700"></div>
 
                 {/* Top: Model Selector */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase mb-2 tracking-wider">大模型选择</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wider ml-1">大模型选择</label>
                   <div className="relative">
                     <select
                       value={model}
                       onChange={(e) => setModel(e.target.value)}
-                      className="w-full bg-[#0B0C15] border border-white/10 rounded-xl py-3.5 px-5 text-slate-200 font-medium focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none appearance-none transition-all hover:bg-[#1A1D2D]"
+                      className="w-full bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-300 rounded-2xl py-4 px-5 text-slate-700 font-bold focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none appearance-none transition-all cursor-pointer shadow-sm"
                     >
                       {models.map((m) => (
                         <option key={m.id} value={m.id}>{m.name}</option>
                       ))}
                     </select>
-                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500">
+                    <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none text-blue-500">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                   </div>
@@ -173,59 +177,56 @@ const App: React.FC = () => {
 
                 {/* Middle: Text Input */}
                 <div className="flex-1">
-                  <label className="block text-xs font-bold text-slate-400 uppercase mb-2 tracking-wider">文本输入 / 对话内容</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wider ml-1">文本输入 / 对话内容</label>
                   <textarea
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     placeholder="在此输入产品信息、补充说明，或直接向 AI 提问..."
-                    className="w-full h-40 bg-[#0B0C15] border border-white/10 rounded-xl p-5 text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none resize-none transition-all hover:bg-[#1A1D2D]"
+                    className="w-full h-44 bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-300 rounded-2xl p-5 text-slate-700 placeholder-slate-400 font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none resize-none transition-all shadow-inner"
                   />
                 </div>
 
                 {/* Bottom: Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                  {/* Generate Report Button - Golden Gradient */}
+                  {/* Generate Report Button - Bright Gradient */}
                   <button
                     onClick={() => handleAction('report')}
                     disabled={isLoading}
-                    className="flex-1 relative overflow-hidden group/btn bg-gradient-to-r from-yellow-700 to-yellow-500 hover:from-yellow-600 hover:to-yellow-400 text-white font-bold py-4 rounded-xl shadow-[0_4px_20px_rgba(234,179,8,0.2)] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none border border-yellow-400/20"
+                    className="flex-1 relative overflow-hidden group/btn bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                   >
                     <div className="relative z-10 flex items-center justify-center gap-2">
                         {isLoading && resultMode === 'report' ? (
-                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         ) : (
-                            <svg className="w-5 h-5 text-yellow-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                         )}
                         <span>生成检测报告 (模板)</span>
                     </div>
-                    {/* Shine Effect */}
-                    <div className="absolute top-0 left-[-100%] w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 transition-all duration-1000 group-hover/btn:left-[100%]"></div>
                   </button>
 
-                  {/* Chat Button - Blue Outline/Gradient */}
+                  {/* Chat Button - Light Outline */}
                   <button
                     onClick={() => handleAction('chat')}
                     disabled={isLoading}
-                    className="flex-1 relative overflow-hidden group/btn bg-[#0f172a] hover:bg-[#1e293b] border border-blue-500/50 text-blue-100 font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-700 font-bold py-4 rounded-xl shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    <div className="absolute inset-0 bg-blue-600/5 group-hover/btn:bg-blue-600/10 transition-colors"></div>
-                    <div className="relative z-10 flex items-center justify-center gap-2">
                         {isLoading && resultMode === 'chat' ? (
-                        <svg className="animate-spin h-5 w-5 text-blue-400" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <svg className="animate-spin h-5 w-5 text-blue-600" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         ) : (
-                            <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                         )}
                         <span>自由咨询 / 问答</span>
-                    </div>
                   </button>
                 </div>
               </div>
 
               {/* Result Area */}
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl text-red-300 flex items-start gap-3 animate-fade-in backdrop-blur-md">
-                  <svg className="w-5 h-5 shrink-0 mt-0.5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
-                  {error}
+                <div className="bg-red-50 border border-red-100 p-4 rounded-2xl text-red-600 flex items-start gap-3 animate-fade-in shadow-sm">
+                  <div className="p-1 bg-red-100 rounded-full shrink-0">
+                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                  </div>
+                  <div className="mt-0.5 font-medium">{error}</div>
                 </div>
               )}
 
@@ -234,11 +235,12 @@ const App: React.FC = () => {
                   {resultMode === 'report' ? (
                     <ResultDisplay result={result} />
                   ) : (
-                    <div className="bg-[#131522]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-                      <h3 className="text-lg font-bold text-slate-200 mb-6 flex items-center gap-3 border-b border-white/5 pb-4">
+                    <div className="bg-white/80 backdrop-blur-xl border border-white/50 rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative">
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400"></div>
+                      <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
                         <span className="text-2xl">🤖</span> AI 智能回复
                       </h3>
-                      <div className="prose prose-invert prose-slate max-w-none whitespace-pre-wrap leading-relaxed">
+                      <div className="prose prose-slate max-w-none whitespace-pre-wrap leading-relaxed text-slate-700">
                         {result}
                       </div>
                     </div>
