@@ -10,6 +10,40 @@ export interface ChatMessage {
   content: string;
 }
 
+// 获取 API Key 的辅助函数
+const getApiKey = (): string => {
+  // 1. 优先从 LocalStorage 读取 (用户手动配置)
+  if (typeof window !== 'undefined') {
+    const localKey = localStorage.getItem('custom_api_key');
+    if (localKey && localKey.trim() !== '') {
+      return localKey.trim();
+    }
+  }
+
+  // 2. 尝试从 Vite 环境变量读取
+  if ((import.meta as any).env && (import.meta as any).env.VITE_GEMINI_API_KEY) {
+    return (import.meta as any).env.VITE_GEMINI_API_KEY;
+  }
+
+  // 3. 尝试从 process.env 读取 (兼容非浏览器环境或构建时注入)
+  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+    return process.env.API_KEY;
+  }
+
+  return '';
+};
+
+// 获取 Base URL 的辅助函数
+const getBaseUrl = (): string | undefined => {
+  if (typeof window !== 'undefined') {
+    const localUrl = localStorage.getItem('custom_base_url');
+    if (localUrl && localUrl.trim() !== '') {
+      return localUrl.trim();
+    }
+  }
+  return (import.meta as any).env?.VITE_GEMINI_BASE_URL;
+};
+
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -115,6 +149,25 @@ const REPORT_TEMPLATE = `
 
 const getProductContext = () => `**内部产品数据库：** \n\`\`\`json\n${JSON.stringify(products, null, 2)}\n\`\`\``;
 
+// 初始化 AI 客户端的通用方法
+const createAIClient = () => {
+    const apiKey = getApiKey();
+    if (!apiKey) {
+        throw new Error("请求失败: 未配置 API Key。请点击右上角'API 配置'进行设置，或检查环境变量。");
+    }
+    
+    const clientOptions: any = { apiKey };
+    const baseUrl = getBaseUrl();
+    if (baseUrl) {
+        // 尝试通过 baseUrl 配置代理地址
+        // 注意：@google/genai SDK 的不同版本对 baseUrl 的支持方式可能不同
+        // 这里尝试直接传入 options，如果 SDK 支持它会生效
+        clientOptions.baseUrl = baseUrl;
+    }
+
+    return new GoogleGenAI(clientOptions);
+};
+
 // 统一的分析函数
 export const analyzeMealSafety = async (
     allFiles: File[], 
@@ -122,7 +175,7 @@ export const analyzeMealSafety = async (
     userInput: string,
     mode: 'report' | 'chat'
 ): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = createAIClient();
   
     // 根据模式决定 Prompt
     let systemInstruction = '';
@@ -144,22 +197,27 @@ export const analyzeMealSafety = async (
     // 处理所有文件
     const fileParts = await processFilesForGemini(allFiles);
 
-    const response = await ai.models.generateContent({
-        model: modelId,
-        contents: {
-            role: 'user',
-            parts: [
-                { text: userPrompt },
-                ...fileParts
-            ]
-        },
-        config: {
-            systemInstruction: systemInstruction,
-            temperature: 0.7
-        }
-    });
+    try {
+        const response = await ai.models.generateContent({
+            model: modelId,
+            contents: {
+                role: 'user',
+                parts: [
+                    { text: userPrompt },
+                    ...fileParts
+                ]
+            },
+            config: {
+                systemInstruction: systemInstruction,
+                temperature: 0.7
+            }
+        });
 
-    return response.text || "API 未返回有效内容";
+        return response.text || "API 未返回有效内容";
+    } catch (error: any) {
+        console.error("AI Request Failed:", error);
+        throw new Error(error.message || "请求 AI 服务失败");
+    }
 };
 
 export const sendChatMessage = async (
@@ -167,7 +225,7 @@ export const sendChatMessage = async (
     modelId: string,
     supportingFiles: File[]
 ): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = createAIClient();
 
     const fileParts = await processFilesForGemini(supportingFiles);
     
@@ -190,14 +248,19 @@ export const sendChatMessage = async (
     const systemInstruction = `你是一个全能助手，也是预制菜领域的专家。请根据用户提供的图片、文档和对话历史进行回答。
     ${getProductContext()}`;
 
-    const response = await ai.models.generateContent({
-        model: modelId,
-        contents: contents,
-        config: {
-            systemInstruction: systemInstruction,
-            temperature: 0.7
-        }
-    });
+    try {
+        const response = await ai.models.generateContent({
+            model: modelId,
+            contents: contents,
+            config: {
+                systemInstruction: systemInstruction,
+                temperature: 0.7
+            }
+        });
 
-    return response.text || "API 未返回有效内容";
+        return response.text || "API 未返回有效内容";
+    } catch (error: any) {
+        console.error("Chat Request Failed:", error);
+        throw new Error(error.message || "对话请求失败");
+    }
 };
