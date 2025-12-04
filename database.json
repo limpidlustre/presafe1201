@@ -1,4 +1,3 @@
-
 export const products = [
   {
     "id": "prod_001",
@@ -922,7 +921,7 @@ export const products = [
       }
     ]
   },
-  {
+{
     "id": "prod_013",
     "name": "六全儿童馄饨",
     "manufacturer": "河南蜀道香食品科技",
@@ -1354,7 +1353,7 @@ export const products = [
       }
     ]
   },
-  {
+{
     "id": "prod_019",
     "name": "粮全其美黑椒牛肉脆皮馅饼",
     "manufacturer": "四川蜀道香食品科技",
@@ -1570,7 +1569,7 @@ export const products = [
       }
     ]
   },
-  {
+{
     "id": "prod_022",
     "name": "卡兹脆脆鸡排",
     "manufacturer": "河南蜀道香食品科技",
@@ -2002,7 +2001,7 @@ export const products = [
       }
     ]
   },
-  {
+{
     "id": "prod_028",
     "name": "肉松",
     "manufacturer": "四川蜀道香食品科技",
@@ -2449,7 +2448,7 @@ export const products = [
   {
     "id": "prod_033",
     "name": "黑椒鸡排",
-    "manufacturer": "青岛先优食品有限公司",
+    "manufacturer": "XX市食品有限公司",
     "productStandardCode": "SB/T 10379",
     "productionLicenseNumber": "SC10437021402943",
     "ingredients": [
@@ -2464,8 +2463,8 @@ export const products = [
     "shelfLife": "12个月",
     "storage": "-18℃以下冷冻保存",
     "cookingMethod": "完全解冻，裹粉，放入180℃油中，炸3-4分钟即可食用；空气炸锅可选：200℃预热后放入鸡排，烤制15-18分钟，中途翻面",
-    "origin": "山东省青岛市",
-    "address": "山东省青岛市城阳区棘洪滩南万社区青大工业园",
+    "origin": "XX省XX市",
+    "address": "XX省XX市XX区XX工业园",
     "contact": "400-6918-766",
     "netWeight": {
       "total": "500g",
@@ -2474,32 +2473,32 @@ export const products = [
     "rawMaterials": [
       {
         "name": "鸡肉",
-        "origin": "山东青岛平度养殖基地",
-        "supplier": "青岛九联集团股份有限公司平度分公司",
+        "origin": "XX省XX市XX区养殖基地",
+        "supplier": "XX市XX集团股份有限公司",
         "productionDate": "2025-10-21",
         "batchNumber": "J1034",
         "productionLicenseNumber": "SC19701"
       },
       {
         "name": "固态复合调味料",
-        "origin": "山东青岛调味料产业园",
-        "supplier": "青岛花帝食品股份有限公司调味料分公司",
+        "origin": "XX省XX调味料产业园",
+        "supplier": "XX市食品股份有限公司调味料分公司",
         "productionDate": "2025-10-21",
         "batchNumber": "T1034",
         "productionLicenseNumber": "SC19702"
       },
       {
         "name": "裹粉预拌粉",
-        "origin": "山东潍坊食品配料厂",
-        "supplier": "潍坊中慧食品科技有限公司",
+        "origin": "XX省XX市食品配料厂",
+        "supplier": "XX市食品科技有限公司",
         "productionDate": "2025-10-18",
         "batchNumber": "G1034",
         "productionLicenseNumber": "SC19703"
       },
       {
         "name": "食用植物油",
-        "origin": "山东东营粮油基地",
-        "supplier": "益海（东营）粮油工业有限公司",
+        "origin": "XX省XX市粮油基地",
+        "supplier": "XX粮油工业有限公司",
         "productionDate": "2025-10-15",
         "batchNumber": "Y1034",
         "productionLicenseNumber": "SC19704"
@@ -2507,13 +2506,13 @@ export const products = [
     ],
     "packaging": {
       "inner": {
-        "supplier": "青岛恒信包装有限公司城阳分公司",
+        "supplier": "XX市恒信包装有限公司",
         "productionDate": "2025-10-22",
         "batchNumber": "NB034",
         "productionLicenseNumber": "SC19800034"
       },
       "outer": {
-        "supplier": "青岛盛达纸箱制造有限公司",
+        "supplier": "XX市纸箱制造有限公司",
         "productionDate": "2025-10-23",
         "batchNumber": "WB034",
         "productionLicenseNumber": "SC19900034"
@@ -2522,21 +2521,21 @@ export const products = [
     "distributionChannels": [
       {
         "type": "餐饮",
-        "name": "青岛德克士食品有限公司市南区五四广场店",
-        "location": "青岛南区",
+        "name": "XX市食品有限公司市南区五四广场店",
+        "location": "XX市南区",
         "description": "连锁炸鸡快餐店"
       },
       {
         "type": "零售",
-        "name": "青岛利群集团股份有限公司崂山区万象汇超市冷冻区",
-        "location": "青岛崂山区",
+        "name": "XX市XX集团股份有限公司崂山区万象汇超市冷冻区",
+        "location": "XX市XX区",
         "description": "大型商超冷冻区"
       },
       {
         "type": "电商直播",
         "platform": "抖音生鲜",
-        "name": "青岛优鲜达供应链管理有限公司抖音直播分部",
-        "location": "山东青岛",
+        "name": "XX市优鲜达供应链管理有限公司",
+        "location": "XX省XX市",
         "description": "生鲜类直播带货渠道"
       }
     ]
@@ -2555,7 +2554,7 @@ export const products = [
       "复配水分保持剂（三聚磷酸钠、六偏磷酸钠、磷酸氢二钠、碳酸氢钠、柠檬酸钠）",
       "固态复合调味料（味精、碳酸氢钠、液态复合调味料、鸡精调味料）"
     ],
-    "shelfLife": "12个月",
+    "shelfLife": "12 个月",
     "storage": "-18℃以下冷冻保存",
     "cookingMethod": "自然烤制：烤箱提前 240-260℃预热，烤制过程翻面 1 次，全程 8-10 分钟，撒调料、孜然料口感更佳",
     "origin": "河南省郑州市",
@@ -2617,7 +2616,7 @@ export const products = [
       "食用盐",
       "复合调味料（大豆分离蛋白、小麦纤维、食用香精、碳酸钠、谷氨酰胺转氨酶、黄原胶、卡拉胶）"
     ],
-    "shelfLife": "12个月",
+    "shelfLife": "12 个月",
     "storage": "-18℃以下冷冻保存",
     "cookingMethod": "完全解冻后煎制，每面各煎 2.5 分钟，全程 5 分钟即可食用",
     "origin": "河南省郑州市",
@@ -2678,7 +2677,7 @@ export const products = [
       "食品添加剂（硝酸钠、三聚磷酸钠、焦磷酸钠、六偏磷酸钠、白砂糖、淀粉、香辛料、辣椒精、红曲红、卡拉胶、亚硝酸钠）",
       "食用盐"
     ],
-    "shelfLife": "9个月",
+    "shelfLife": "9 个月",
     "storage": "-18℃以下冷冻保存",
     "cookingMethod": "无需解冻，可油炸、煎、炒、烧烤，煎制 3-5 分钟至两面金黄即可",
     "origin": "山东省诸城市",
@@ -2743,7 +2742,7 @@ export const products = [
       "食用香精",
       "卡拉胶"
     ],
-    "shelfLife": "12个月",
+    "shelfLife": "12 个月",
     "storage": "-18℃以下冷冻保存，避免反复解冻",
     "cookingMethod": "无需解冻，火锅沸水中涮煮 15-20 秒至变色熟透；也可煎制、炒制，搭配酱料风味更佳",
     "origin": "山东省烟台市",
