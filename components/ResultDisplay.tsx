@@ -97,7 +97,7 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
   lines.forEach(line => {
     const trimmedLine = line.trim();
     if (trimmedLine.startsWith('#')) {
-      titleComponent = <h1 key="title" className="text-3xl font-bold text-center tracking-tight mb-8 text-slate-800">{trimmedLine.replace(/#/g, '').trim()}</h1>;
+      titleComponent = <h1 key="title" className="text-4xl font-bold text-center tracking-tight mb-10 text-slate-900">{trimmedLine.replace(/#/g, '').trim()}</h1>;
     } else if (trimmedLine.startsWith('|')) {
       tableLines.push(trimmedLine);
     }
@@ -132,12 +132,12 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
 
     // 清新蓝白表格样式
     tableContent = (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
-            <table className="min-w-full text-sm border-collapse text-slate-700">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+            <table className="min-w-full text-base border-collapse text-slate-700">
             <thead className="bg-[#F1F5F9]">
                 <tr>
                 {headerContent.map((header, i) => (
-                    <th key={i} className={`px-4 py-3 font-bold text-slate-700 border-b border-slate-300 ${i===0 ? 'text-left' : 'text-center'}`}>
+                    <th key={i} className={`px-6 py-4 font-bold text-slate-800 border-b border-slate-300 text-lg ${i===0 ? 'text-left' : 'text-center'}`}>
                     {header}
                     </th>
                 ))}
@@ -151,7 +151,7 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
                         {rowIndex === 0 && (
                         <td 
                             rowSpan={group.rows.length} 
-                            className="px-4 py-3 font-bold text-slate-800 border-r border-slate-200 bg-slate-50 align-middle w-32"
+                            className="px-6 py-4 font-bold text-slate-800 border-r border-slate-200 bg-slate-50 align-middle w-40"
                         >
                             {group.category}
                         </td>
@@ -163,16 +163,16 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
 
                              if (isResultColumn) {
                                  if (cell.includes('不合格')) {
-                                     content = <span className="inline-block bg-red-100 text-red-700 px-2 py-1 rounded font-bold">不合格</span>;
+                                     content = <span className="inline-block bg-red-100 text-red-700 px-3 py-1.5 rounded-lg font-bold text-base">不合格</span>;
                                  } else if (cell.includes('待复检')) {
-                                     content = <span className="inline-block bg-amber-100 text-amber-700 px-2 py-1 rounded font-bold">待复检</span>;
+                                     content = <span className="inline-block bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg font-bold text-base">待复检</span>;
                                  } else if (cell.includes('合格')) {
-                                     content = <span className="inline-block bg-emerald-100 text-emerald-700 px-2 py-1 rounded font-bold">合格</span>;
+                                     content = <span className="inline-block bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg font-bold text-base">合格</span>;
                                  }
                              }
 
                              return (
-                                <td key={cellIndex} className={`px-4 py-3 border-r border-slate-100 last:border-0 break-words ${isResultColumn ? 'text-center' : 'text-left'}`}>
+                                <td key={cellIndex} className={`px-6 py-4 border-r border-slate-100 last:border-0 break-words ${isResultColumn ? 'text-center' : 'text-left'}`}>
                                     {content}
                                 </td>
                              );
@@ -187,28 +187,28 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
     );
   } else {
       tableContent = (
-         <div className="prose prose-slate max-w-none whitespace-pre-wrap">
+         <div className="prose prose-lg prose-slate max-w-none whitespace-pre-wrap">
              {result}
          </div>
       );
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-xl border border-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+    <div className="bg-white/90 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
       {/* Action Bar */}
-      <div className="bg-slate-50/80 px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h3 className="text-lg font-bold text-slate-800">AI 分析报告</h3>
-        <div className="flex gap-3 w-full sm:w-auto">
+      <div className="bg-slate-50/80 px-8 py-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <h3 className="text-xl font-bold text-slate-800">AI 分析报告</h3>
+        <div className="flex gap-4 w-full sm:w-auto">
           <button 
             onClick={handleDownloadPdf} 
             disabled={isDownloading} 
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg transition-all text-sm shadow-sm"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold py-2.5 px-5 rounded-xl transition-all text-base shadow-sm"
           >
             {isDownloading ? (
                <span className="animate-pulse">生成中...</span>
             ) : (
                 <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-500" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
                 下载 PDF
@@ -217,9 +217,9 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
           </button>
           <button 
             onClick={handleShareLink} 
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 font-bold py-2 px-4 rounded-lg hover:bg-blue-100 transition-all text-sm shadow-sm"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 font-bold py-2.5 px-5 rounded-xl hover:bg-blue-100 transition-all text-base shadow-sm"
           >
-             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
              </svg>
              分享报告
@@ -227,33 +227,33 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
         </div>
       </div>
 
-      <div ref={reportRef} className="p-8 min-h-[600px] text-slate-800 bg-white">
+      <div ref={reportRef} className="p-10 min-h-[600px] text-slate-800 bg-white">
         
         {/* Title */}
-        {titleComponent || <h1 className="text-3xl font-bold text-center mb-8 text-slate-900">预制菜安全检测 AI 分析报告</h1>}
+        {titleComponent || <h1 className="text-4xl font-bold text-center mb-10 text-slate-900">预制菜安全检测 AI 分析报告</h1>}
 
         {/* Safety Status Banner */}
         {safetyStatus && (
-            <div className={`mb-8 p-5 rounded-2xl border ${safetyStatus.colorClass} flex items-start gap-4 print:hidden shadow-sm`}>
-                <div className={`mt-1 p-2 rounded-full shadow-sm ${safetyStatus.iconColor} flex-shrink-0`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className={`mb-10 p-6 rounded-2xl border ${safetyStatus.colorClass} flex items-start gap-5 print:hidden shadow-sm`}>
+                <div className={`mt-1.5 p-2.5 rounded-full shadow-sm ${safetyStatus.iconColor} flex-shrink-0`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
                 <div>
-                    <h4 className="text-lg font-bold">{safetyStatus.title}</h4>
-                    <p className="text-sm mt-1 opacity-90 leading-relaxed font-medium">{safetyStatus.message}</p>
+                    <h4 className="text-xl font-bold">{safetyStatus.title}</h4>
+                    <p className="text-base mt-2 opacity-90 leading-relaxed font-medium">{safetyStatus.message}</p>
                 </div>
             </div>
         )}
 
-        <div className="mb-6 flex justify-center text-sm text-slate-400 font-medium">
+        <div className="mb-8 flex justify-center text-base text-slate-400 font-medium">
              生成日期: {new Date().toLocaleString('zh-CN')}
         </div>
 
         {tableContent}
 
-        <div className="mt-12 pt-6 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400 gap-2">
+        <div className="mt-16 pt-8 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-400 gap-3">
             <span className="font-semibold">Powered by Gemini 2.5 AI Agent</span>
             <span>本报告由 AI 自动生成，结果仅供参考，不作为法律依据</span>
         </div>
